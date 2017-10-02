@@ -1,0 +1,245 @@
+---
+### layout:
+### title: Bloc Jams
+### thumbnail-path: "img/blocJams.png"
+### short-description: Build a music player app.
+
+---
+
+{:.center}
+![]({{ site.baseurl }}/img/blocJams.png)
+
+
+## Summary
+
+*BlocJams* is a music payer app that focuses completely on playing music and takes users to their favourite music collections. By logging into their profile and playing uninterrupted tunes. 
+
+## Explanation
+
+I was challenged to help create a music app focused on music with no distractions. As a junior developer I was asked to work on front end code. The other stakeholders include a senior developer who over saw my code.
+
+## Problem
+
+There was a requirement to build a skeleton layout of the music app and convert vanilla Javascript to libraries and frameworks to lessen amount of code and page load
+
+The issues to overcome in this project include:
+
+* to build a responsive layout
+* to develop an eye-catching interactive promotion on the landing page of the app
+* to turn a skeleton of vanilla javascript into a more succinct form of javascript such as the jQuery lirary
+* to separate the calls to the data in a object in the HTML of an application with Angular directives
+* to define custom directives to operate interactions with the volume control of the music player
+
+## Solution
+
+*responsive layout*
+
+I used relative measurements for the layout. Columns of content were defined that would change size of an element relative to the size of its container. For instance, this block of code will be 50% the size of it’s container:
+
+```
+
+<div class="column half">
+                        <img src="assets/images/album-covers/01.png" class="album-cover-art"  />
+</div>
+
+```
+
+With the selector defining the styling for this with:
+
+```
+        .column {
+                float: left;
+                padding-left: 1rem;
+                padding-right: 1rem;
+        }
+
+        .column.full { width: 100%; }
+        .column.two-thirds { width: 66.7%; }
+        .column.half { width: 50%; }
+        .column.third { width: 33.3%; }
+        .column.fourth { width: 25%; }
+        .column.flow-opposite { float: right; }
+
+```
+
+*interactive promotion*
+
+I was asked to create an eye catching promotion for the different feature of the app. I combined strong contrasting colours with jQuery to reveal the text and styling as the user scrolled down the page:
+
+```
+.point {
+    position: relative;
+    padding: 2rem;
+    margin: .8rem;
+    text-align: center;
+    background: linear-gradient(rgb(58,23,63), cyan 95%);
+    opacity: 0;
+    -webkit-transform: scaleX(0.9) translateY(3rem);
+    -moz-transform: scaleX(0.9) translateY(3rem);
+    transform: scaleX(0.9) translateY(3rem);
+    -webkit-transition: all 1s linear;
+    -moz-transition: all 1s linear;
+    transition: all 1s linear;
+    -webkit-transition-delay: 0.2s;
+    -moz-transition-delay: 0.2s;
+    transition-delay: 0.2s;
+}
+
+```
+
+Here the opacity of the element is set to zero and the starting scale of the 90% vertically and horizontally to 3rem. jQuery allows us to move the horizontal and vertical position to it’s default:
+
+```
+var animatePoints = function() {
+        var revealPoint = function() {
+                $(this).css( {
+                        opacity: 1,
+                        transform: 'scaleX(1) translateY(0)'
+                });
+        };
+
+        $.each($('.point'), revealPoint);
+};
+
+```
+
+*from vanilla to jQuery*
+
+The lines with a - symbol represent the vanilla Javascript removed and replaced with those lines without the - symbol. Here the css() method changes the opacity and transform declarations in far fewer lines than plain Javascript can manage. Each ‘.point’ selector has the revealpoint function called on it at the end of the animatePoints function.
+
+
+```
+
+ -var pointsArray = document.getElementsByClassName('point');
+ 
+ -var animatePoints = function(points) {
+ var animatePoints = function() {
+     -var revealPoint = function(index) {
+         -points[index].style.opacity = 1;
+         -points[index].style.transform = "scaleX(1) translateY(0)";
+         -points[index].style.msTransform = "scaleX(1) translateY(0)";
+         -points[index].style.WebkitTransform = "scaleX(1) translateY(0)";
+     var revealPoint = function() {
+         // #7
+         $(this).css({
+             opacity: 1,
+             transform: 'scaleX(1) translateY(0)'
+         });
+     };
+     -for (var i = 0; i < points.length; i++) {
+         -revealPoint(i);
+     -}
+     // #6
+     $.each($('.point'), revealPoint);
+ };
+
+```
+
+*introducing Angular*
+
+Angular allows us to enhance HTML by updating data in a model which is the data, logic and rules of an application and is represented by the HTML as the view of that data. Updates made to the view are reflected in the model and vice-versa. 
+
+An example of this process and the more economical approach to code is how I transformed existing jQuery code that appends a template stored in a script to an existing HTML element.
+
+```
+var buildCollectionItemTemplate = function() {
+    var template =
+                    '<div class="collection-album-container column fourth">'
+                  + '  <img src="assets/images/album_covers/01.png"/>'
+                  + '  <div class="collection-album-info caption">'
+                  + '    <p>'
+                  + '      <a class="album-name" href="album.html"> The Colors </a>'
+                  + '      <br/>'
+                  + '      <a href="album.html"> Pablo Picasso </a>'
+                  + '      <br/>'
+                  + '      X songs'
+                  + '      <br/>'
+                  + '    </p>'
+                  + '  </div>'
+                  + '</div>'
+                  ;
+             return $(template);
+         };
+
+ $(window).load(function() {
+         var $collectionContainer = $('.album-covers');
+        $collectionContainer.empty();
+
+        for (var i = 0; i < 12; i++) {
+                var $newThumbnail = buildCollectionItemTemplate();
+                $collectionContainer.append($newThumbnail);
+        }
+});
+
+```
+
+We can utilise a reusable and modular alternative approach to this code with Angular. Instead of locating all the manipulation and creation of DOM elements in scripts we can situate interaction with these in the view. 
+
+‘’’
+
+   <div class="collection-album-container column fourth" ng-repeat="album in collection.albums track by $index">
+   ……
+
+   <a class="album-name" ui-sref="album">{{ album.title }}</a>
+   …..
+
+‘’’
+
+Here the iterations of the collection template are referenced within the view and all presentation is segragated in the HTML. This is more closely related to the actual purpose  of HTML and allows us to separate it from logic and organisation of the data. 
+
+*custom Angular directives*
+
+In the first instance we created functionality with jQuery by setting the placement of the seek bar based on horizontal location placement of the cursor when a user clicks on the screen:
+
+```
+
+   // set the horizontal coordinate minus the offset of the seek bar
+   var offsetX = event.pageX - $(this).offset().left;
+   var barWidth = $(this).width();
+   // divide offsetX by the width of the entire bar to calculate seekBarFillRatio
+   var seekBarFillRatio = offsetX / barWidth;
+
+```
+
+We then update this location as a percentage value and call the function that wraps these definitions in the document when it loads. The various variables and functions that complete this process amount to some 80 lines of code and can only affect the elements that are listed with this script.
+
+```
+
+   var $seekBars = $('.player-bar .seek-bar');
+
+
+```
+
+With Angular we can define the functionality of the app within the view itself with directives.
+
+```
+var calculatePercent = function(seekBar, event) {
+    var offsetX = event.pageX - seekBar.offset().left;
+    var seekBarWidth = seekBar.width();
+    var offsetXPercent = offsetX / seekBarWidth;
+    offsetXPercent = Math.max(0, offsetXPercent);
+    offsetXPercent = Math.min(1, offsetXPercent);
+    return offsetXPercent;
+};
+
+…
+
+scope.onClickSeekBar = function(event) {
+    var percent = calculatePercent(seekBar, event);
+…
+
+```
+This is part of a custom directive called ‘seekBar’ which can then be referenced in the view. The scope and event references parameters for how the DOM will be manipulated within a template which itself will be called from the view. Event refers to the event that will take place when a user clicks on an element. This is defined within a template that can be placed anywhere a volume or song duration seek bar is required.
+
+```
+
+<div class="seek-bar" ng-click="onClickSeekBar($event)">
+    <div class="fill" ng-style="fillStyle()"></div>
+    <div class="thumb" ng-style="thumbStyle()" ng-mousedown="trackThumb()"></div>
+</div>
+
+```
+
+## Conclusion
+
+This project has demonstrated how styles can be enhanced with jQuery and how javascript itself can be made more efficient and modular with the aid of the Angular Javascript framework. 
